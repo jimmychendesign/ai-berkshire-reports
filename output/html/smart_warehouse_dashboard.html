@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Warehouse Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-1: #f6fafc;
+      --bg-2: #eef5fb;
+      --surface: rgba(255, 255, 255, 0.88);
+      --surface-strong: rgba(255, 255, 255, 0.97);
+      --stroke: rgba(15, 56, 91, 0.12);
+      --text-main: #11283d;
+      --text-sub: #5a7186;
+      --text-soft: #7f95a8;
+
+      --brand: #0f8ecf;
+      --brand-soft: #cdefff;
+      --online: #24c97a;
+      --waiting: #f2b541;
+      --working: #2f8fff;
+      --completed: #19b66e;
+
+      --stage-picking: #2f8fff;
+      --stage-assembly: #24b7a5;
+      --stage-packaging: #ff8a4a;
+
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+
+      --shadow-soft: 0 12px 38px rgba(18, 60, 98, 0.1);
+      --shadow-card: 0 10px 24px rgba(18, 60, 98, 0.08);
+      --shadow-stage: 0 16px 28px rgba(18, 60, 98, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Manrope, "Segoe UI", sans-serif;
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at 12% 12%, #dcf5ff 0%, transparent 33%),
+        radial-gradient(circle at 86% 20%, #e2f1ff 0%, transparent 36%),
+        linear-gradient(145deg, var(--bg-1), var(--bg-2));
+      padding: clamp(14px, 2vw, 28px);
+    }
+
+    .dashboard {
+      max-width: 1820px;
+      margin: 0 auto;
+      min-height: calc(100vh - clamp(28px, 4vw, 56px));
+      display: grid;
+      grid-template-rows: auto auto auto 1fr auto;
+      gap: clamp(12px, 1.2vw, 18px);
+      padding: clamp(14px, 1.6vw, 24px);
+      border-radius: 28px;
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.8), rgba(248, 253, 255, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+    }
+
+    .card {
+      background: var(--surface-strong);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #2ea3de, #1f7fcb);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    }
+
+    .logo svg { width: 26px; height: 26px; }
+
+    .title {
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: 0.08em;
+      font-size: clamp(18px, 1.5vw, 26px);
+      font-weight: 700;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: clamp(12px, 1vw, 16px);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #eafff3;
+      color: #0f8b50;
+      border: 1px solid rgba(36, 201, 122, 0.26);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--online);
+      box-shadow: 0 0 0 6px rgba(36, 201, 122, 0.16), 0 0 14px rgba(36, 201, 122, 0.6);
+      animation: pulse 1.7s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    .clock {
+      font-family: "Space Grotesk", monospace;
+      font-weight: 700;
+      font-size: clamp(16px, 1.4vw, 24px);
+      color: #0e4873;
+      letter-spacing: 0.05em;
+      min-width: 130px;
+      text-align: right;
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: clamp(10px, 1vw, 14px);
+    }
+
+    .shelf {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      background: linear-gradient(155deg, #ffffff, #f5fbff);
+    }
+
+    .shelf-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .shelf-id {
+      font-weight: 800;
+      font-size: clamp(13px, 1vw, 16px);
+    }
+
+    .part-tag {
+      font-size: clamp(11px, 0.9vw, 13px);
+      color: #1f618e;
+      background: var(--brand-soft);
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .shelf-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 8px;
+    }
+
+    .stock-num {
+      font-size: clamp(34px, 3.2vw, 56px);
+      line-height: 1;
+      font-weight: 800;
+      color: #093b5f;
+    }
+
+    .stock-label {
+      font-size: clamp(11px, 0.92vw, 13px);
+      color: var(--text-soft);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    .icon-wrap {
+      width: clamp(44px, 3.6vw, 58px);
+      height: clamp(44px, 3.6vw, 58px);
+      border-radius: 14px;
+      background: linear-gradient(145deg, #eaf5ff, #dceeff);
+      display: grid;
+      place-items: center;
+      color: var(--brand);
+    }
+
+    .icon-wrap svg { width: 58%; height: 58%; }
+
+    .subline {
+      text-align: center;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #3b5971;
+      font-size: clamp(16px, 1.35vw, 24px);
+      padding: 2px 0;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: clamp(12px, 1vw, 16px);
+      min-height: 0;
+    }
+
+    .side-panel,
+    .main-panel {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: clamp(16px, 1.1vw, 20px);
+      font-weight: 800;
+      color: #14344f;
+    }
+
+    .panel-title svg {
+      width: 18px;
+      height: 18px;
+      color: #2f8fff;
+    }
+
+    .badge {
+      border-radius: 999px;
+      font-size: clamp(11px, 0.87vw, 13px);
+      font-weight: 700;
+      padding: 5px 10px;
+      border: 1px solid;
+    }
+
+    .badge.waiting {
+      color: #946202;
+      background: #fff6df;
+      border-color: #f5d587;
+    }
+
+    .badge.success {
+      color: #0f874f;
+      background: #eafff4;
+      border-color: #95e6bd;
+    }
+
+    .list-card {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--stroke);
+      background: linear-gradient(160deg, #ffffff, #f7fcff);
+      display: grid;
+      gap: 4px;
+    }
+
+    .list-card .id {
+      font-weight: 800;
+      font-size: clamp(14px, 1vw, 17px);
+      color: #15324b;
+    }
+
+    .list-card .desc {
+      font-size: clamp(12px, 0.9vw, 14px);
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    .robot-cards {
+      display: grid;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .robot-card {
+      padding: clamp(12px, 1vw, 16px);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow-stage);
+      background: linear-gradient(145deg, #fff, #f8fcff);
+      display: grid;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .robot-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      border-radius: 10px;
+      background: var(--stage);
+    }
+
+    .robot-top,
+    .robot-mid {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .robot-id {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      color: #11324f;
+      font-size: clamp(14px, 1vw, 18px);
+    }
+
+    .stage-label {
+      font-size: clamp(11px, 0.88vw, 13px);
+      color: #38617f;
+      font-weight: 700;
+    }
+
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      font-size: clamp(11px, 0.83vw, 12px);
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 4px 9px;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+
+    .chip.working {
+      color: #1254a8;
+      background: #eaf3ff;
+      border-color: #b5d2ff;
+    }
+
+    .chip.order {
+      color: #195f91;
+      background: #e8f7ff;
+      border-color: #b9e6ff;
+    }
+
+    .battery {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: clamp(11px, 0.86vw, 13px);
+      color: #40627d;
+      font-weight: 700;
+    }
+
+    .battery svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .task {
+      font-size: clamp(12px, 0.92vw, 14px);
+      color: #45627a;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .progress-wrap {
+      display: grid;
+      gap: 7px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: clamp(11px, 0.82vw, 12px);
+      color: #4f6f87;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .progress-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: #e5eef6;
+      overflow: hidden;
+      border: 1px solid #d8e6f2;
+    }
+
+    .progress-bar > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--stage) 72%, #ffffff), var(--stage));
+    }
+
+    .footer {
+      text-align: right;
+      color: #688298;
+      font-size: clamp(10px, 0.78vw, 12px);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 4px 2px 0;
+    }
+
+    @media (max-width: 1280px) {
+      .pipeline { grid-template-columns: 1fr; }
+      .inventory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .clock { text-align: left; }
+      .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .header-right { width: 100%; justify-content: space-between; }
+      .footer { text-align: left; }
+    }
+
+    @media (max-width: 720px) {
+      .inventory-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <header class="header card">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 11.5L12 7l8 4.5-8 4.5-8-4.5Z" stroke="white" stroke-width="1.6"/>
+            <path d="M4 15l8 4.5 8-4.5" stroke="white" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <h1 class="title">SMART WAREHOUSE MONITOR</h1>
+      </div>
+      <div class="header-right">
+        <div class="status"><span class="status-dot"></span>SYSTEM ONLINE</div>
+        <div id="clock" class="clock" aria-live="polite">20:37:24</div>
+      </div>
+    </header>
+
+    <section class="inventory-grid">
+      <article class="shelf card">
+        <div class="shelf-top">
+          <h2 class="shelf-id">S1 - Shelf A</h2>
+          <span class="part-tag">Precision Gears</span>
+        </div>
+        <div class="shelf-body">
+          <div>
+            <div class="stock-num">124</div>
+            <div class="stock-label">STOCK AMOUNT</div>
+          </div>
+          <div class="icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M2 12h3M19 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+          </div>
+        </div>
+      </article>
+
+      <article class="shelf card">
+        <div class="shelf-top">
+          <h2 class="shelf-id">S2 - Shelf B</h2>
+          <span class="part-tag">Industrial Nuts</span>
+        </div>
+        <div class="shelf-body">
+          <div>
+            <div class="stock-num">89</div>
+            <div class="stock-label">STOCK AMOUNT</div>
+          </div>
+          <div class="icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3h8l5 9-5 9H8l-5-9 5-9Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+          </div>
+        </div>
+      </article>
+
+      <article class="shelf card">
+        <div class="shelf-top">
+          <h2 class="shelf-id">S3 - Shelf C</h2>
+          <span class="part-tag">Integrated Chips</span>
+        </div>
+        <div class="shelf-body">
+          <div>
+            <div class="stock-num">256</div>
+            <div class="stock-label">STOCK AMOUNT</div>
+          </div>
+          <div class="icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg>
+          </div>
+        </div>
+      </article>
+
+      <article class="shelf card">
+        <div class="shelf-top">
+          <h2 class="shelf-id">S4 - Shelf D</h2>
+          <span class="part-tag">Standard Totes</span>
+        </div>
+        <div class="shelf-body">
+          <div>
+            <div class="stock-num">42</div>
+            <div class="stock-label">STOCK AMOUNT</div>
+          </div>
+          <div class="icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3"/></svg>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <div class="subline">Real-time Pipeline Operations (Multi-task Parallel)</div>
+
+    <section class="pipeline">
+      <aside class="side-panel card">
+        <div class="panel-head">
+          <h3 class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 6h11M8 12h11M8 18h11"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+            Queueing
+          </h3>
+          <span class="badge waiting">2 Orders</span>
+        </div>
+        <article class="list-card">
+          <div class="id">Order T-1004</div>
+          <div class="desc">Estimated to start picking in 1 min</div>
+        </article>
+        <article class="list-card">
+          <div class="id">Order T-1005</div>
+          <div class="desc">Estimated to start picking in 3 mins</div>
+        </article>
+      </aside>
+
+      <section class="main-panel card">
+        <div class="panel-head">
+          <h3 class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 7h12M6 12h12M6 17h12"/><circle cx="6" cy="7" r="2"/><circle cx="18" cy="12" r="2"/><circle cx="12" cy="17" r="2"/></svg>
+            Robot Pipeline
+          </h3>
+        </div>
+
+        <div class="robot-cards">
+          <article class="robot-card" style="--stage: var(--stage-picking);">
+            <div class="robot-top">
+              <div class="robot-id">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="8" width="16" height="10" rx="3"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+                R-01
+                <span class="stage-label">Stage 1: Picking</span>
+              </div>
+              <div class="status-group">
+                <span class="chip working">Working</span>
+                <span class="battery">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10v4"/></svg>
+                  85%
+                </span>
+              </div>
+            </div>
+            <div class="robot-mid">
+              <span class="chip order">Order T-1003</span>
+              <p class="task">Heading to S1 to pick parts...</p>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-top"><span>PROGRESS</span><span>25%</span></div>
+              <div class="progress-bar"><span style="width: 25%;"></span></div>
+            </div>
+          </article>
+
+          <article class="robot-card" style="--stage: var(--stage-assembly);">
+            <div class="robot-top">
+              <div class="robot-id">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="8" width="16" height="10" rx="3"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+                R-03
+                <span class="stage-label">Stage 2: Assembly</span>
+              </div>
+              <div class="status-group">
+                <span class="chip working">Working</span>
+                <span class="battery">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10v4"/></svg>
+                  42%
+                </span>
+              </div>
+            </div>
+            <div class="robot-mid">
+              <span class="chip order">Order T-1002</span>
+              <p class="task">Assembling motor and base...</p>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-top"><span>PROGRESS</span><span>65%</span></div>
+              <div class="progress-bar"><span style="width: 65%;"></span></div>
+            </div>
+          </article>
+
+          <article class="robot-card" style="--stage: var(--stage-packaging);">
+            <div class="robot-top">
+              <div class="robot-id">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="8" width="16" height="10" rx="3"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+                R-06
+                <span class="stage-label">Stage 3: Packaging</span>
+              </div>
+              <div class="status-group">
+                <span class="chip working">Working</span>
+                <span class="battery">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10v4"/></svg>
+                  98%
+                </span>
+              </div>
+            </div>
+            <div class="robot-mid">
+              <span class="chip order">Order T-1001</span>
+              <p class="task">Sealing and labeling box...</p>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-top"><span>PROGRESS</span><span>90%</span></div>
+              <div class="progress-bar"><span style="width: 90%;"></span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <aside class="side-panel card">
+        <div class="panel-head">
+          <h3 class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 13 5 5L20 7"/></svg>
+            Delivered
+          </h3>
+          <span class="badge success">Today: 12</span>
+        </div>
+        <article class="list-card">
+          <div class="id">Order T-1000</div>
+          <div class="desc">Completed 2 mins ago</div>
+        </article>
+        <article class="list-card">
+          <div class="id">Order T-0999</div>
+          <div class="desc">Completed 8 mins ago</div>
+        </article>
+      </aside>
+    </section>
+
+    <footer class="footer">WAREHOUSE MONITORING SYSTEM V2.5.0 // MULTI-TASK PIPELINE ACTIVE</footer>
+  </main>
+
+  <script>
+    const clock = document.getElementById("clock");
+
+    function tickClock() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      clock.textContent = `${hh}:${mm}:${ss}`;
+    }
+
+    tickClock();
+    setInterval(tickClock, 1000);
+  </script>
+</body>
+</html>

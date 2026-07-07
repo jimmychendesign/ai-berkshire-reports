@@ -1,0 +1,16 @@
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+.DS_Store
+npm-debug.log*
+
+# Local environments and build caches
+.venv/
+__pycache__/
+*.py[cod]
+*.tsbuildinfo
+.npm-cache/
+.next/
+
+# Local machine config backups
+assets/config/*.toml*
