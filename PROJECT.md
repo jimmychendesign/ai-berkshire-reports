@@ -14,7 +14,7 @@ AI Berkshire 投研报告站点
 
 - Stage: 可运行静态站点
 - Progress: 已完成基础目录归类、VitePress 首页、报告页、Summary 卡片和 GitHub Pages workflow
-- Last Updated: 2026-07-07
+- Last Updated: 2026-07-09
 
 ## Tech Stack
 
@@ -98,3 +98,5 @@ VitePress 站点入口在 `docs/`。定制组件位于 `docs/components/`，主�
 2026-07-07：新增 `ASTS卫星直连手机NTN行业格局芒格视角_20260707.md`，聚焦 D2D/NTN 行业格局、竞争态势与 ASTS 位置。
 
 2026-07-07：新增 `ASTS投资团队研究报告_20260707.md`，综合商业模式、财务估值、行业竞争、风险与管理层四维判断。
+
+2026-07-09：更新 `ASTS投资团队研究报告_20260707.md`，刷新股价、市值、三情景估值，并加入 BlueBird 11/12/13 目标 2026 年 8 月上半月发射的催化剂。
