@@ -68,4 +68,5 @@ npm run sync
 npm run build
 ```
 
-构建产物位于 `docs/.vitepress/dist/`。
+构建产物位于 `output/html/site/`。其中 `index.html` 是站点入口；`output/html/`
+仍可用于保存其他独立导出的 HTML 文件。

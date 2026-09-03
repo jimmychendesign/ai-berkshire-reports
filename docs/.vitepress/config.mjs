@@ -6,6 +6,7 @@ export default defineConfig({
   description: '由 Markdown 投研报告生成的可阅读静态站点',
   lang: 'zh-CN',
   base: process.env.VITEPRESS_BASE || '/',
+  outDir: '../output/html/site',
   cleanUrls: true,
   lastUpdated: true,
   themeConfig: {

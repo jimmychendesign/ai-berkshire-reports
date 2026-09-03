@@ -14,7 +14,7 @@ AI Berkshire 投研报告站点
 
 - Stage: 可运行静态站点
 - Progress: 已完成基础目录归类、VitePress 首页、报告页、Summary 卡片和 GitHub Pages workflow
-- Last Updated: 2026-07-09
+- Last Updated: 2026-08-21
 
 ## Tech Stack
 
@@ -41,7 +41,7 @@ assets/
 
 `docs/research/` 保存原始投研 Markdown；`src/scripts/sync-reports.mjs` 读取这些源文件，生成 `docs/reports/` 下的 VitePress 报告页，并更新 `docs/.vitepress/reports.data.mjs` 供首页卡片和侧边栏使用。
 
-VitePress 站点入口在 `docs/`。定制组件位于 `docs/components/`，主题样式位于 `docs/.vitepress/theme/`。
+VitePress 站点入口在 `docs/`。定制组件位于 `docs/components/`，主题样式位于 `docs/.vitepress/theme/`，静态站点构建到 `output/html/site/`。
 
 ## Features
 
@@ -54,6 +54,7 @@ VitePress 站点入口在 `docs/`。定制组件位于 `docs/components/`，主�
 - [x] 表格和移动端阅读样式
 - [x] GitHub Pages workflow
 - [x] 项目文件按模板归类
+- [x] VitePress 静态 HTML 统一输出到 `output/html/site/`
 - [x] 新增 ASTS 卫星直连手机 / NTN 行业研究报告
 - [x] 新增 ASTS investment-team 综合研究报告
 
@@ -93,7 +94,9 @@ VitePress 站点入口在 `docs/`。定制组件位于 `docs/components/`，主�
 
 ## Notes
 
-根目录只保留项目入口和配置文件。研究源文件进入 `docs/research/`，生成页面进入 `docs/reports/`，生成型 HTML 进入 `output/html/`。
+根目录只保留项目入口和配置文件。研究源文件进入 `docs/research/`，生成页面进入 `docs/reports/`，VitePress 静态站点进入 `output/html/site/`，其他独立 HTML 可放在 `output/html/`。
+
+2026-08-21：将 VitePress `outDir` 调整为 `output/html/site/`，并同步更新 GitHub Pages 部署路径。
 
 2026-07-07：新增 `ASTS卫星直连手机NTN行业格局芒格视角_20260707.md`，聚焦 D2D/NTN 行业格局、竞争态势与 ASTS 位置。
 

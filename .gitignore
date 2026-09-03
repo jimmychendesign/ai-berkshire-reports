@@ -1,6 +1,7 @@
 node_modules/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+output/html/site/
 .DS_Store
 npm-debug.log*
 
